@@ -38,6 +38,9 @@ importers:
       vue:
         specifier: ^3.4.34
         version: 3.5.13
+      vue-highcharts:
+        specifier: ^0.2.0
+        version: 0.2.0(highcharts@12.3.0)(vue@3.5.13)
       vue-router:
         specifier: ^4.4.0
         version: 4.5.0(vue@3.5.13)
@@ -1584,6 +1587,12 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
+  vue-highcharts@0.2.0:
+    resolution: {integrity: sha512-+zXI/ei3KgpVuEreyeTsvLIp092m+03JtTwg6gj7DxtjJqi4LhYvV/rBnUoaXuvqTsiPNwPBPKeyiATL9iM2Gw==}
+    peerDependencies:
+      highcharts: '>=4.2.0'
+      vue: '>=3'
+
   vue-router@4.5.0:
     resolution: {integrity: sha512-HDuk+PuH5monfNuY+ct49mNmkCRK4xJAV9Ts4z9UFc4rzdDnxQLyCMGGc8pKhZhHTVzfanpNwB/lwqevcBwI4w==}
     peerDependencies:
@@ -3037,6 +3046,11 @@ snapshots:
       semver: 7.7.1
     transitivePeerDependencies:
       - supports-color
+
+  vue-highcharts@0.2.0(highcharts@12.3.0)(vue@3.5.13):
+    dependencies:
+      highcharts: 12.3.0
+      vue: 3.5.13
 
   vue-router@4.5.0(vue@3.5.13):
     dependencies:
