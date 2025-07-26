@@ -60,7 +60,7 @@ const handleLogout = async () => {
                         />
                     </g>
                 </svg> -->
-                <img src="/logo-company-2.jpg" alt="logo" class="w-2/12 md:w-auto mb-4 mt-3" />
+                <img src="/logo-company-2.png" alt="logo" class="w-2/12 md:w-auto mb-4 mt-3" />
 
                 <!-- <span>AssurExpat</span> -->
             </router-link>
