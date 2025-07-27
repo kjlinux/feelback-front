@@ -22,7 +22,7 @@ const chartOptions = computed(() => {
     }
 
     const chartData = deviceData.value.chart_data;
-    
+
     // Préparer les données pour le graphique en barres horizontales
     const satisfactionData = chartData.series.find(s => s.name === 'Taux de satisfaction (%)');
     const feedbackData = chartData.series.find(s => s.name === 'Total feedbacks');
@@ -214,7 +214,7 @@ const averageSatisfaction = computed(() => {
 
 const bestPerformingDevice = computed(() => {
     if (!deviceData.value || !deviceData.value.table_data || deviceData.value.table_data.length === 0) return null;
-    return deviceData.value.table_data.reduce((best, current) => 
+    return deviceData.value.table_data.reduce((best, current) =>
         parseFloat(current.satisfaction_rate) > parseFloat(best.satisfaction_rate) ? current : best
     );
 });
@@ -338,7 +338,7 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- Refresh Button -->
-            <button 
+            <button
                 @click="fetchDevicePerformance"
                 :disabled="loading"
                 class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-4 lg:mt-0"
