@@ -41,9 +41,9 @@ const router = createRouter({
                     meta: { requiresAuth: true }
                 },
                 {
-                    path: '/uikit/contract-payment',
-                    name: 'contract-payment',
-                    component: () => import('@/views/uikit/ContractPayment.vue'),
+                    path: '/uikit/test-manager',
+                    name: 'test-manager',
+                    component: () => import('@/views/uikit/TestManager.vue'),
                     props: true,
                     meta: { requiresAuth: true }
                 },
