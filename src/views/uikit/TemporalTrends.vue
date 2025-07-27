@@ -8,7 +8,6 @@ import Highcharts from 'highcharts';
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const toast = useToast();
 
-// Reactive data
 const loading = ref(true);
 const trendsData = ref(null);
 const error = ref(null);
@@ -20,14 +19,12 @@ const chartRef = ref(null);
 const chartContainer = ref(null);
 let chartInstance = null;
 
-// Period options
 const periodOptions = [
     { label: 'Quotidien', value: 'daily' },
     { label: 'Hebdomadaire', value: 'weekly' },
     { label: 'Mensuel', value: 'monthly' }
 ];
 
-// Highcharts configuration
 const chartOptions = computed(() => {
     if (!trendsData.value || !trendsData.value.series || trendsData.value.series.length === 0) {
         return {};
@@ -73,7 +70,6 @@ const chartOptions = computed(() => {
         },
         yAxis: [
             {
-                // Primary Y-axis for feedback count
                 title: {
                     text: 'Nombre de retours',
                     style: {
@@ -92,7 +88,6 @@ const chartOptions = computed(() => {
                 lineColor: isDarkTheme.value ? '#4b5563' : '#d1d5db'
             },
             {
-                // Secondary Y-axis for satisfaction rate
                 title: {
                     text: 'Taux de satisfaction (%)',
                     style: {
@@ -191,7 +186,6 @@ const chartOptions = computed(() => {
     };
 });
 
-// Statistics computed
 const totalFeedbacks = computed(() => {
     if (!trendsData.value || !trendsData.value.series) return 0;
     const feedbackSeries = trendsData.value.series.find((s) => s.name === 'Total feedbacks');
@@ -210,16 +204,13 @@ const periodsCount = computed(() => {
     return trendsData.value && trendsData.value.categories ? trendsData.value.categories.length : 0;
 });
 
-// Fonction pour créer le graphique manuellement
 const createChart = () => {
     try {
         if (chartContainer.value && chartOptions.value && Object.keys(chartOptions.value).length > 0) {
-            // Détruire l'instance précédente si elle existe
             if (chartInstance) {
                 chartInstance.destroy();
             }
 
-            // Créer une nouvelle instance
             chartInstance = Highcharts.chart(chartContainer.value, chartOptions.value);
         }
     } catch (error) {
@@ -227,7 +218,6 @@ const createChart = () => {
     }
 };
 
-// Watch pour recréer le graphique quand les options changent
 watch(
     chartOptions,
     () => {
@@ -238,7 +228,6 @@ watch(
     { deep: true }
 );
 
-// Fonction pour obtenir les données d'une série
 const getSeriesData = (seriesName, index) => {
     if (!trendsData.value || !trendsData.value.series) return 0;
     let series;
@@ -252,7 +241,6 @@ const getSeriesData = (seriesName, index) => {
     return series && series.data && series.data[index] !== undefined ? series.data[index] : 0;
 };
 
-// Fetch temporal trends data
 const fetchTemporalTrends = async () => {
     try {
         loading.value = true;
@@ -266,13 +254,10 @@ const fetchTemporalTrends = async () => {
 
         const response = await apiClient.get('/app/dashboard/trends', { params });
 
-        // Debug: log des données reçues
         console.log('Données reçues:', response.data);
 
-        // Extraire les données de la réponse API
         trendsData.value = response.data.data;
 
-        // Vérifier la structure des données
         if (!response.data.series || response.data.series.length === 0) {
             console.warn('Aucune série de données trouvée');
         }
@@ -298,11 +283,10 @@ const fetchTemporalTrends = async () => {
     }
 };
 
-// Lifecycle
 onMounted(async () => {
     try {
         await fetchTemporalTrends();
-        // Attendre que le DOM soit mis à jour avant de rendre le graphique
+
         await nextTick();
         createChart();
     } catch (error) {
@@ -310,7 +294,6 @@ onMounted(async () => {
     }
 });
 
-// Watch for filter changes
 watch([selectedPeriod, startDate, endDate], async () => {
     try {
         await fetchTemporalTrends();
@@ -321,7 +304,6 @@ watch([selectedPeriod, startDate, endDate], async () => {
     }
 });
 
-// Cleanup
 onBeforeUnmount(() => {
     if (chartInstance) {
         chartInstance.destroy();
@@ -332,27 +314,15 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <!-- Header with filters -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             <div>
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tendances Temporelles</h2>
                 <p class="text-gray-600 dark:text-gray-400">Évolution du taux de satisfaction et du volume de retours</p>
             </div>
 
-            <!-- Filters -->
             <div class="flex flex-col sm:flex-row gap-4 mt-4 lg:mt-0">
-                <!-- Period selector -->
-<Dropdown 
-    v-model="selectedPeriod" 
-    :options="periodOptions" 
-    optionLabel="label" 
-    optionValue="value"
-    placeholder="Sélectionner une période"
-    class="w-48"
-    :class="{ 'p-dropdown-dark': isDarkTheme }"
-/>
+                <Dropdown v-model="selectedPeriod" :options="periodOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner une période" class="w-48" :class="{ 'p-dropdown-dark': isDarkTheme }" />
 
-                <!-- Date range -->
                 <div class="flex gap-2">
                     <Calendar v-model="startDate" placeholder="Date de début" dateFormat="dd/mm/yy" showIcon class="w-40" :class="{ 'p-calendar-dark': isDarkTheme }" />
                     <Calendar v-model="endDate" placeholder="Date de fin" dateFormat="dd/mm/yy" showIcon class="w-40" :class="{ 'p-calendar-dark': isDarkTheme }" />
@@ -360,13 +330,11 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <!-- Loading State -->
         <div v-if="loading" class="flex items-center justify-center py-12">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement des tendances...</span>
         </div>
 
-        <!-- Error State -->
         <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <div class="flex items-center">
                 <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,9 +345,7 @@ onBeforeUnmount(() => {
             <button @click="fetchTemporalTrends" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">Réessayer</button>
         </div>
 
-        <!-- Chart Content -->
         <div v-else-if="trendsData && trendsData.series && trendsData.series.length > 0" class="space-y-6">
-            <!-- Statistics Summary -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -399,17 +365,14 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <!-- Highcharts Container -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                <!-- Debug: Afficher la structure des données -->
                 <div v-if="!chartOptions || Object.keys(chartOptions).length === 0" class="text-center py-8 text-gray-500">Configuration du graphique en cours...</div>
-                <!-- Container pour le graphique avec gestion d'erreur -->
+
                 <div v-else>
                     <div ref="chartContainer" style="height: 400px; width: 100%"></div>
                 </div>
             </div>
 
-            <!-- Data Summary Table -->
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Résumé des données</h3>
 
@@ -473,7 +436,6 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <!-- No Data State -->
         <div v-else-if="!loading && trendsData" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <p>Aucune donnée disponible pour la période sélectionnée</p>
         </div>

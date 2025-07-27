@@ -8,14 +8,12 @@ import Highcharts from 'highcharts';
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const toast = useToast();
 
-// Reactive data
 const loading = ref(true);
 const deviceData = ref(null);
 const error = ref(null);
 const chartContainer = ref(null);
 let chartInstance = null;
 
-// Highcharts configuration
 const chartOptions = computed(() => {
     if (!deviceData.value || !deviceData.value.chart_data || !deviceData.value.chart_data.series) {
         return {};
@@ -23,9 +21,8 @@ const chartOptions = computed(() => {
 
     const chartData = deviceData.value.chart_data;
 
-    // Préparer les données pour le graphique en barres horizontales
-    const satisfactionData = chartData.series.find(s => s.name === 'Taux de satisfaction (%)');
-    const feedbackData = chartData.series.find(s => s.name === 'Total feedbacks');
+    const satisfactionData = chartData.series.find((s) => s.name === 'Taux de satisfaction (%)');
+    const feedbackData = chartData.series.find((s) => s.name === 'Total feedbacks');
 
     return {
         chart: {
@@ -65,7 +62,6 @@ const chartOptions = computed(() => {
         },
         yAxis: [
             {
-                // Primary Y-axis for satisfaction rate
                 title: {
                     text: 'Taux de satisfaction (%)',
                     style: {
@@ -87,7 +83,6 @@ const chartOptions = computed(() => {
                 lineColor: isDarkTheme.value ? '#4b5563' : '#d1d5db'
             },
             {
-                // Secondary Y-axis for feedback count
                 title: {
                     text: 'Nombre de retours',
                     style: {
@@ -101,7 +96,7 @@ const chartOptions = computed(() => {
                         color: '#17a2b8',
                         fontSize: '11px'
                     },
-                    formatter: function() {
+                    formatter: function () {
                         return this.value.toLocaleString();
                     }
                 },
@@ -119,7 +114,7 @@ const chartOptions = computed(() => {
                 fontSize: '12px'
             },
             formatter: function () {
-                const deviceInfo = deviceData.value.table_data.find(d => d.name === this.x);
+                const deviceInfo = deviceData.value.table_data.find((d) => d.name === this.x);
                 let tooltip = `<b>${this.x}</b><br/>`;
                 tooltip += `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${this.series.name.includes('%') ? this.y + '%' : this.y.toLocaleString()}</b><br/>`;
                 if (deviceInfo) {
@@ -150,7 +145,7 @@ const chartOptions = computed(() => {
                         fontSize: '11px',
                         fontWeight: '500'
                     },
-                    formatter: function() {
+                    formatter: function () {
                         return this.series.name.includes('%') ? this.y + '%' : this.y.toLocaleString();
                     }
                 },
@@ -171,7 +166,7 @@ const chartOptions = computed(() => {
             },
             {
                 name: 'Total feedbacks (milliers)',
-                data: feedbackData ? feedbackData.data.map(val => Math.round(val / 1000)) : [],
+                data: feedbackData ? feedbackData.data.map((val) => Math.round(val / 1000)) : [],
                 color: '#17a2b8',
                 yAxis: 1,
                 animation: {
@@ -196,7 +191,6 @@ const chartOptions = computed(() => {
     };
 });
 
-// Statistics computed
 const totalDevices = computed(() => {
     return deviceData.value && deviceData.value.table_data ? deviceData.value.table_data.length : 0;
 });
@@ -214,21 +208,16 @@ const averageSatisfaction = computed(() => {
 
 const bestPerformingDevice = computed(() => {
     if (!deviceData.value || !deviceData.value.table_data || deviceData.value.table_data.length === 0) return null;
-    return deviceData.value.table_data.reduce((best, current) =>
-        parseFloat(current.satisfaction_rate) > parseFloat(best.satisfaction_rate) ? current : best
-    );
+    return deviceData.value.table_data.reduce((best, current) => (parseFloat(current.satisfaction_rate) > parseFloat(best.satisfaction_rate) ? current : best));
 });
 
-// Fonction pour créer le graphique
 const createChart = () => {
     try {
         if (chartContainer.value && chartOptions.value && Object.keys(chartOptions.value).length > 0) {
-            // Détruire l'instance précédente si elle existe
             if (chartInstance) {
                 chartInstance.destroy();
             }
 
-            // Créer une nouvelle instance
             chartInstance = Highcharts.chart(chartContainer.value, chartOptions.value);
         }
     } catch (error) {
@@ -236,7 +225,6 @@ const createChart = () => {
     }
 };
 
-// Watch pour recréer le graphique quand les options changent
 watch(
     chartOptions,
     () => {
@@ -247,7 +235,6 @@ watch(
     { deep: true }
 );
 
-// Fonction pour obtenir la classe de statut
 const getStatusClass = (status) => {
     switch (status) {
         case 'success':
@@ -261,7 +248,6 @@ const getStatusClass = (status) => {
     }
 };
 
-// Fonction pour obtenir l'icône de statut
 const getStatusIcon = (status) => {
     switch (status) {
         case 'success':
@@ -275,7 +261,6 @@ const getStatusIcon = (status) => {
     }
 };
 
-// Fetch device performance data
 const fetchDevicePerformance = async () => {
     try {
         loading.value = true;
@@ -308,7 +293,6 @@ const fetchDevicePerformance = async () => {
     }
 };
 
-// Lifecycle
 onMounted(async () => {
     try {
         await fetchDevicePerformance();
@@ -319,7 +303,6 @@ onMounted(async () => {
     }
 });
 
-// Cleanup
 onBeforeUnmount(() => {
     if (chartInstance) {
         chartInstance.destroy();
@@ -330,19 +313,13 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <!-- Header -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
             <div>
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Performance par Dispositif</h2>
                 <p class="text-gray-600 dark:text-gray-400">Analyse des performances de chaque boîtier de feedback</p>
             </div>
 
-            <!-- Refresh Button -->
-            <button
-                @click="fetchDevicePerformance"
-                :disabled="loading"
-                class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-4 lg:mt-0"
-            >
+            <button @click="fetchDevicePerformance" :disabled="loading" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-4 lg:mt-0">
                 <svg class="w-4 h-4 mr-2" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -350,13 +327,11 @@ onBeforeUnmount(() => {
             </button>
         </div>
 
-        <!-- Loading State -->
         <div v-if="loading" class="flex items-center justify-center py-12">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement des performances...</span>
         </div>
 
-        <!-- Error State -->
         <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <div class="flex items-center">
                 <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,9 +342,7 @@ onBeforeUnmount(() => {
             <button @click="fetchDevicePerformance" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">Réessayer</button>
         </div>
 
-        <!-- Content -->
         <div v-else-if="deviceData && deviceData.chart_data && deviceData.table_data" class="space-y-6">
-            <!-- Statistics Summary -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -395,7 +368,6 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <!-- Highcharts Container -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                 <div v-if="!chartOptions || Object.keys(chartOptions).length === 0" class="text-center py-8 text-gray-500">Configuration du graphique en cours...</div>
                 <div v-else>
@@ -403,7 +375,6 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <!-- Device Details Table -->
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Détails des Dispositifs</h3>
 
@@ -436,9 +407,7 @@ onBeforeUnmount(() => {
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                    📍 {{ device.location }}
-                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">📍 {{ device.location }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                     {{ device.total_feedbacks.toLocaleString() }}
                                 </td>
@@ -459,18 +428,13 @@ onBeforeUnmount(() => {
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                                     {{ new Date(device.last_feedback_date).toLocaleDateString('fr-FR') }}
-                                    <br>
+                                    <br />
                                     <span class="text-xs text-gray-400">
                                         {{ new Date(device.last_feedback_date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                        :class="getStatusClass(device.status)"
-                                    >
-                                        {{ getStatusIcon(device.status) }} {{ device.status }}
-                                    </span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :class="getStatusClass(device.status)"> {{ getStatusIcon(device.status) }} {{ device.status }} </span>
                                 </td>
                             </tr>
                         </tbody>
@@ -479,7 +443,6 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <!-- No Data State -->
         <div v-else-if="!loading" class="text-center py-12 text-gray-500 dark:text-gray-400">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>

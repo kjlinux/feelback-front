@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { apiClient } from '@/service/auth';
 
-// Composants PrimeVue
 import Card from 'primevue/card';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
@@ -19,14 +18,12 @@ import Message from 'primevue/message';
 
 const toast = useToast();
 
-// États réactifs
 const loading = ref(false);
 const devices = ref([]);
 const examples = ref({});
-const selectedExample = ref('');
+const selectedExample = ref(null);
 const activeTabIndex = ref(0);
 
-// Configuration pour la génération de données
 const generateConfig = ref({
     devices_count: 5,
     feedbacks_per_device: 50,
@@ -39,7 +36,6 @@ const generateConfig = ref({
     distribute_evenly: true
 });
 
-// Configuration pour feedback manuel
 const manualFeedback = ref({
     device_id: '',
     type: 'satisfied',
@@ -47,22 +43,17 @@ const manualFeedback = ref({
     ip_address: ''
 });
 
-// Options pour les types de feedback
 const feedbackTypes = [
     { label: 'Insatisfait', value: 'unsatisfied', severity: 'danger' },
     { label: 'Neutre', value: 'neutral', severity: 'warning' },
     { label: 'Satisfait', value: 'satisfied', severity: 'success' }
 ];
 
-// Validation des pourcentages
 const percentagesValid = computed(() => {
-    const total = generateConfig.value.unsatisfied_percentage +
-                 generateConfig.value.neutral_percentage +
-                 generateConfig.value.satisfied_percentage;
+    const total = generateConfig.value.unsatisfied_percentage + generateConfig.value.neutral_percentage + generateConfig.value.satisfied_percentage;
     return total === 100;
 });
 
-// Mode de configuration (par device ou total)
 const usePerDeviceMode = computed({
     get: () => !generateConfig.value.feedbacks_count,
     set: (value) => {
@@ -74,8 +65,11 @@ const usePerDeviceMode = computed({
     }
 });
 
-// Options pour les dropdowns
 const exampleOptions = computed(() => {
+    console.log('Computing example options from:', examples.value);
+    if (!examples.value || typeof examples.value !== 'object') {
+        return [];
+    }
     return Object.entries(examples.value).map(([key, example]) => ({
         label: example.description,
         value: key
@@ -83,13 +77,12 @@ const exampleOptions = computed(() => {
 });
 
 const deviceOptions = computed(() => {
-    return devices.value.map(device => ({
+    return devices.value.map((device) => ({
         label: `${device.name} (${device.code})`,
         value: device.id
     }));
 });
 
-// Charger les devices disponibles
 const loadDevices = async () => {
     try {
         const response = await apiClient.get('/app/test-data/devices');
@@ -105,21 +98,28 @@ const loadDevices = async () => {
     }
 };
 
-// Charger les exemples de configuration
 const loadExamples = async () => {
     try {
         const response = await apiClient.get('/app/test-data/examples');
         examples.value = response.data.data.examples;
+        console.log('Examples loaded:', examples.value);
     } catch (error) {
         console.error('Erreur lors du chargement des exemples:', error);
     }
 };
 
-// Appliquer un exemple de configuration
 const applyExample = () => {
-    if (!selectedExample.value || !examples.value[selectedExample.value]) return;
+    console.log('Applying example:', selectedExample.value);
+    console.log('Available examples:', examples.value);
+
+    if (!selectedExample.value || !examples.value[selectedExample.value]) {
+        console.warn('Example not found:', selectedExample.value);
+        return;
+    }
 
     const example = examples.value[selectedExample.value];
+    console.log('Example payload:', example.payload);
+
     generateConfig.value = { ...generateConfig.value, ...example.payload };
 
     toast.add({
@@ -130,7 +130,6 @@ const applyExample = () => {
     });
 };
 
-// Générer des données de test
 const generateTestData = async () => {
     if (!percentagesValid.value && generateConfig.value.feedback_types.length === 0) {
         toast.add({
@@ -147,7 +146,6 @@ const generateTestData = async () => {
 
         const payload = { ...generateConfig.value };
 
-        // Nettoyer les valeurs vides
         if (!payload.feedbacks_count) delete payload.feedbacks_count;
         if (payload.feedback_types.length === 0) delete payload.feedback_types;
         if (!payload.session_id) delete payload.session_id;
@@ -162,9 +160,7 @@ const generateTestData = async () => {
             life: 5000
         });
 
-        // Recharger les devices
         await loadDevices();
-
     } catch (error) {
         console.error('Erreur lors de la génération:', error);
         const message = error.response?.data?.message || 'Erreur lors de la génération des données';
@@ -179,7 +175,6 @@ const generateTestData = async () => {
     }
 };
 
-// Ajouter un feedback manuel
 const addManualFeedback = async () => {
     if (!manualFeedback.value.device_id) {
         toast.add({
@@ -207,17 +202,15 @@ const addManualFeedback = async () => {
             life: 5000
         });
 
-        // Réinitialiser le formulaire
         manualFeedback.value = {
             device_id: '',
             type: 'satisfied',
             session_id: '',
             ip_address: ''
         };
-
     } catch (error) {
-        console.error('Erreur lors de l\'ajout:', error);
-        const message = error.response?.data?.message || 'Erreur lors de l\'ajout du feedback';
+        console.error("Erreur lors de l'ajout:", error);
+        const message = error.response?.data?.message || "Erreur lors de l'ajout du feedback";
         toast.add({
             severity: 'error',
             summary: 'Erreur',
@@ -229,7 +222,6 @@ const addManualFeedback = async () => {
     }
 };
 
-// Nettoyer toutes les données
 const cleanAllData = async () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer toutes les données de test ? Cette action est irréversible.')) {
         return;
@@ -247,9 +239,7 @@ const cleanAllData = async () => {
             life: 5000
         });
 
-        // Recharger les devices
         devices.value = [];
-
     } catch (error) {
         console.error('Erreur lors de la suppression:', error);
         const message = error.response?.data?.message || 'Erreur lors de la suppression';
@@ -264,7 +254,6 @@ const cleanAllData = async () => {
     }
 };
 
-// Lifecycle
 onMounted(async () => {
     await Promise.all([loadDevices(), loadExamples()]);
 });
@@ -273,229 +262,120 @@ onMounted(async () => {
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
         <div class="max-w-6xl mx-auto">
-            <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Gestionnaire de Données de Test
-                </h1>
-                <p class="text-gray-600 dark:text-gray-400">
-                    Générez des données de test pour votre dashboard et ajoutez des feedbacks manuellement
-                </p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gestionnaire de Données de Test</h1>
+                <p class="text-gray-600 dark:text-gray-400">Générez des données de test pour votre dashboard et ajoutez des feedbacks manuellement</p>
             </div>
 
-            <!-- Navigation Tabs -->
             <Card class="mb-6">
                 <template #content>
                     <TabView v-model:activeIndex="activeTabIndex">
-                        <!-- Generate Data Tab -->
                         <TabPanel header="Générer des Données">
                             <div class="space-y-6">
-                                <!-- Examples Selector -->
                                 <Message severity="info" :closable="false">
                                     <div class="flex flex-col gap-4">
-                                        <h3 class="text-lg font-medium">
-                                            Configurations Prédéfinies
-                                        </h3>
+                                        <h3 class="text-lg font-medium">Configurations Prédéfinies</h3>
                                         <div class="flex gap-4 items-end">
                                             <div class="flex-1">
-                                                <Dropdown
-                                                    v-model="selectedExample"
-                                                    :options="exampleOptions"
-                                                    optionLabel="label"
-                                                    optionValue="value"
-                                                    placeholder="Sélectionner un exemple"
-                                                    class="w-full"
-                                                />
+                                                <Dropdown v-model="selectedExample" :options="exampleOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un exemple" showClear class="w-full" />
                                             </div>
-                                            <Button
-                                                @click="applyExample"
-                                                :disabled="!selectedExample"
-                                                label="Appliquer"
-                                                severity="info"
-                                            />
+                                            <Button @click="applyExample" :disabled="!selectedExample" label="Appliquer" severity="info" />
                                         </div>
                                     </div>
                                 </Message>
 
-                                <!-- Configuration Form -->
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <!-- Basic Configuration -->
                                     <Card>
-                                        <template #title>
-                                            Configuration de Base
-                                        </template>
+                                        <template #title> Configuration de Base </template>
                                         <template #content>
                                             <div class="space-y-6">
                                                 <div class="field">
-                                                    <label for="devices_count" class="block text-sm font-medium mb-2">
-                                                        Nombre de Devices
-                                                    </label>
-                                                    <InputNumber
-                                                        id="devices_count"
-                                                        v-model="generateConfig.devices_count"
-                                                        :min="1"
-                                                        :max="100"
-                                                        showButtons
-                                                        class="w-full"
-                                                    />
+                                                    <label for="devices_count" class="block text-sm font-medium mb-2"> Nombre de Devices </label>
+                                                    <InputNumber id="devices_count" v-model="generateConfig.devices_count" :min="1" :max="100" showButtons class="w-full" />
                                                 </div>
 
                                                 <div class="field">
-                                                    <label for="days_range" class="block text-sm font-medium mb-2">
-                                                        Période (jours)
-                                                    </label>
-                                                    <InputNumber
-                                                        id="days_range"
-                                                        v-model="generateConfig.days_range"
-                                                        :min="1"
-                                                        :max="365"
-                                                        showButtons
-                                                        class="w-full"
-                                                    />
+                                                    <label for="days_range" class="block text-sm font-medium mb-2"> Période (jours) </label>
+                                                    <InputNumber id="days_range" v-model="generateConfig.days_range" :min="1" :max="365" showButtons class="w-full" />
                                                 </div>
 
                                                 <div class="field">
-                                                    <label class="block text-sm font-medium mb-3">
-                                                        Mode de configuration
-                                                    </label>
+                                                    <label class="block text-sm font-medium mb-3"> Mode de configuration </label>
                                                     <div class="flex flex-col gap-3">
                                                         <div class="flex align-items-center">
-                                                            <RadioButton
-                                                                v-model="usePerDeviceMode"
-                                                                inputId="per_device"
-                                                                :value="true"
-                                                            />
+                                                            <RadioButton v-model="usePerDeviceMode" inputId="per_device" :value="true" />
                                                             <label for="per_device" class="ml-2">Par device</label>
                                                         </div>
                                                         <div class="flex align-items-center">
-                                                            <RadioButton
-                                                                v-model="usePerDeviceMode"
-                                                                inputId="global_total"
-                                                                :value="false"
-                                                            />
+                                                            <RadioButton v-model="usePerDeviceMode" inputId="global_total" :value="false" />
                                                             <label for="global_total" class="ml-2">Total global</label>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <div v-if="usePerDeviceMode" class="field">
-                                                    <label for="feedbacks_per_device" class="block text-sm font-medium mb-2">
-                                                        Feedbacks par Device
-                                                    </label>
-                                                    <InputNumber
-                                                        id="feedbacks_per_device"
-                                                        v-model="generateConfig.feedbacks_per_device"
-                                                        :min="1"
-                                                        showButtons
-                                                        class="w-full"
-                                                    />
+                                                    <label for="feedbacks_per_device" class="block text-sm font-medium mb-2"> Feedbacks par Device </label>
+                                                    <InputNumber id="feedbacks_per_device" v-model="generateConfig.feedbacks_per_device" :min="1" showButtons class="w-full" />
                                                 </div>
                                                 <div v-else class="field">
-                                                    <label for="feedbacks_count" class="block text-sm font-medium mb-2">
-                                                        Total Feedbacks
-                                                    </label>
-                                                    <InputNumber
-                                                        id="feedbacks_count"
-                                                        v-model="generateConfig.feedbacks_count"
-                                                        :min="1"
-                                                        showButtons
-                                                        class="w-full"
-                                                    />
+                                                    <label for="feedbacks_count" class="block text-sm font-medium mb-2"> Total Feedbacks </label>
+                                                    <InputNumber id="feedbacks_count" v-model="generateConfig.feedbacks_count" :min="1" showButtons class="w-full" />
                                                 </div>
 
                                                 <div class="field">
                                                     <div class="flex align-items-center">
-                                                        <Checkbox
-                                                            v-model="generateConfig.distribute_evenly"
-                                                            inputId="distribute_evenly"
-                                                            :binary="true"
-                                                        />
-                                                        <label for="distribute_evenly" class="ml-2">
-                                                            Distribuer équitablement entre les devices
-                                                        </label>
+                                                        <Checkbox v-model="generateConfig.distribute_evenly" inputId="distribute_evenly" :binary="true" />
+                                                        <label for="distribute_evenly" class="ml-2"> Distribuer équitablement entre les devices </label>
                                                     </div>
                                                 </div>
                                             </div>
                                         </template>
                                     </Card>
 
-                                    <!-- Feedback Types Configuration -->
                                     <Card>
-                                        <template #title>
-                                            Types de Feedback
-                                        </template>
+                                        <template #title> Types de Feedback </template>
                                         <template #content>
                                             <div class="space-y-6">
-                                                <!-- Specific Types -->
                                                 <div class="field">
-                                                    <label class="block text-sm font-medium mb-2">
-                                                        Types Spécifiques (optionnel)
-                                                    </label>
+                                                    <label class="block text-sm font-medium mb-2"> Types Spécifiques (optionnel) </label>
                                                     <div class="space-y-3">
                                                         <div v-for="type in feedbackTypes" :key="type.value" class="flex align-items-center">
-                                                            <Checkbox
-                                                                v-model="generateConfig.feedback_types"
-                                                                :inputId="type.value"
-                                                                :value="type.value"
-                                                            />
+                                                            <Checkbox v-model="generateConfig.feedback_types" :inputId="type.value" :value="type.value" />
                                                             <label :for="type.value" class="ml-2">
                                                                 <Tag :value="type.label" :severity="type.severity" />
                                                             </label>
                                                         </div>
                                                     </div>
-                                                    <small class="text-gray-500 dark:text-gray-400">
-                                                        Si spécifié, seuls ces types seront générés
-                                                    </small>
+                                                    <small class="text-gray-500 dark:text-gray-400"> Si spécifié, seuls ces types seront générés </small>
                                                 </div>
 
-                                                <!-- Percentages -->
                                                 <div v-if="generateConfig.feedback_types.length === 0">
-                                                    <label class="block text-sm font-medium mb-2">
-                                                        Répartition par Pourcentages
-                                                    </label>
+                                                    <label class="block text-sm font-medium mb-2"> Répartition par Pourcentages </label>
                                                     <div class="space-y-4">
                                                         <div class="field">
                                                             <div class="flex justify-between mb-2">
                                                                 <span class="text-sm text-red-600">Insatisfait</span>
                                                                 <Tag :value="`${generateConfig.unsatisfied_percentage}%`" severity="danger" />
                                                             </div>
-                                                            <Slider
-                                                                v-model="generateConfig.unsatisfied_percentage"
-                                                                :min="0"
-                                                                :max="100"
-                                                                class="w-full"
-                                                            />
+                                                            <Slider v-model="generateConfig.unsatisfied_percentage" :min="0" :max="100" class="w-full" />
                                                         </div>
                                                         <div class="field">
                                                             <div class="flex justify-between mb-2">
                                                                 <span class="text-sm text-yellow-600">Neutre</span>
                                                                 <Tag :value="`${generateConfig.neutral_percentage}%`" severity="warning" />
                                                             </div>
-                                                            <Slider
-                                                                v-model="generateConfig.neutral_percentage"
-                                                                :min="0"
-                                                                :max="100"
-                                                                class="w-full"
-                                                            />
+                                                            <Slider v-model="generateConfig.neutral_percentage" :min="0" :max="100" class="w-full" />
                                                         </div>
                                                         <div class="field">
                                                             <div class="flex justify-between mb-2">
                                                                 <span class="text-sm text-green-600">Satisfait</span>
                                                                 <Tag :value="`${generateConfig.satisfied_percentage}%`" severity="success" />
                                                             </div>
-                                                            <Slider
-                                                                v-model="generateConfig.satisfied_percentage"
-                                                                :min="0"
-                                                                :max="100"
-                                                                class="w-full"
-                                                            />
+                                                            <Slider v-model="generateConfig.satisfied_percentage" :min="0" :max="100" class="w-full" />
                                                         </div>
                                                     </div>
                                                     <div class="mt-3">
-                                                        <Message
-                                                            :severity="percentagesValid ? 'success' : 'error'"
-                                                            :closable="false"
-                                                        >
+                                                        <Message :severity="percentagesValid ? 'success' : 'error'" :closable="false">
                                                             Total: {{ generateConfig.unsatisfied_percentage + generateConfig.neutral_percentage + generateConfig.satisfied_percentage }}%
                                                             <span v-if="!percentagesValid"> (doit être égal à 100%)</span>
                                                         </Message>
@@ -506,21 +386,12 @@ onMounted(async () => {
                                     </Card>
                                 </div>
 
-                                <!-- Generate Button -->
                                 <div class="flex justify-center pt-4">
-                                    <Button
-                                        @click="generateTestData"
-                                        :loading="loading"
-                                        label="Générer les Données de Test"
-                                        icon="pi pi-cog"
-                                        size="large"
-                                        class="px-8"
-                                    />
+                                    <Button @click="generateTestData" :loading="loading" label="Générer les Données de Test" icon="pi pi-cog" size="large" class="px-8" />
                                 </div>
                             </div>
                         </TabPanel>
 
-                        <!-- Manual Feedback Tab -->
                         <TabPanel header="Feedback Manuel">
                             <div class="flex justify-center">
                                 <Card class="w-full max-w-md">
@@ -533,31 +404,15 @@ onMounted(async () => {
                                     <template #content>
                                         <div class="space-y-6">
                                             <div class="field">
-                                                <label for="device_select" class="block text-sm font-medium mb-2">
-                                                    Device <span class="text-red-500">*</span>
-                                                </label>
-                                                <Dropdown
-                                                    id="device_select"
-                                                    v-model="manualFeedback.device_id"
-                                                    :options="deviceOptions"
-                                                    optionLabel="label"
-                                                    optionValue="value"
-                                                    placeholder="Sélectionner un device"
-                                                    class="w-full"
-                                                />
+                                                <label for="device_select" class="block text-sm font-medium mb-2"> Device <span class="text-red-500">*</span> </label>
+                                                <Dropdown id="device_select" v-model="manualFeedback.device_id" :options="deviceOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un device" class="w-full" />
                                             </div>
 
                                             <div class="field">
-                                                <label class="block text-sm font-medium mb-2">
-                                                    Type de Feedback <span class="text-red-500">*</span>
-                                                </label>
+                                                <label class="block text-sm font-medium mb-2"> Type de Feedback <span class="text-red-500">*</span> </label>
                                                 <div class="space-y-3">
                                                     <div v-for="type in feedbackTypes" :key="type.value" class="flex align-items-center">
-                                                        <RadioButton
-                                                            v-model="manualFeedback.type"
-                                                            :inputId="'manual_' + type.value"
-                                                            :value="type.value"
-                                                        />
+                                                        <RadioButton v-model="manualFeedback.type" :inputId="'manual_' + type.value" :value="type.value" />
                                                         <label :for="'manual_' + type.value" class="ml-2">
                                                             <Tag :value="type.label" :severity="type.severity" />
                                                         </label>
@@ -566,48 +421,24 @@ onMounted(async () => {
                                             </div>
 
                                             <div class="field">
-                                                <label for="session_id" class="block text-sm font-medium mb-2">
-                                                    Session ID (optionnel)
-                                                </label>
-                                                <InputText
-                                                    id="session_id"
-                                                    v-model="manualFeedback.session_id"
-                                                    maxlength="100"
-                                                    class="w-full"
-                                                />
+                                                <label for="session_id" class="block text-sm font-medium mb-2"> Session ID (optionnel) </label>
+                                                <InputText id="session_id" v-model="manualFeedback.session_id" maxlength="100" class="w-full" />
                                             </div>
 
                                             <div class="field">
-                                                <label for="ip_address" class="block text-sm font-medium mb-2">
-                                                    Adresse IP (optionnel)
-                                                </label>
-                                                <InputText
-                                                    id="ip_address"
-                                                    v-model="manualFeedback.ip_address"
-                                                    placeholder="192.168.1.1"
-                                                    class="w-full"
-                                                />
+                                                <label for="ip_address" class="block text-sm font-medium mb-2"> Adresse IP (optionnel) </label>
+                                                <InputText id="ip_address" v-model="manualFeedback.ip_address" placeholder="192.168.1.1" class="w-full" />
                                             </div>
 
-                                            <Button
-                                                @click="addManualFeedback"
-                                                :disabled="!manualFeedback.device_id || !manualFeedback.type"
-                                                :loading="loading"
-                                                label="Ajouter le Feedback"
-                                                icon="pi pi-check"
-                                                severity="success"
-                                                class="w-full"
-                                            />
+                                            <Button @click="addManualFeedback" :disabled="!manualFeedback.device_id || !manualFeedback.type" :loading="loading" label="Ajouter le Feedback" icon="pi pi-check" severity="success" class="w-full" />
                                         </div>
                                     </template>
                                 </Card>
                             </div>
                         </TabPanel>
 
-                        <!-- Management Tab -->
                         <TabPanel header="Gestion">
                             <div class="space-y-6">
-                                <!-- Devices List -->
                                 <Card>
                                     <template #title>
                                         <div class="flex align-items-center">
@@ -625,11 +456,7 @@ onMounted(async () => {
                                         </div>
 
                                         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            <Card
-                                                v-for="device in devices"
-                                                :key="device.id"
-                                                class="border border-gray-200 dark:border-gray-600"
-                                            >
+                                            <Card v-for="device in devices" :key="device.id" class="border border-gray-200 dark:border-gray-600">
                                                 <template #content>
                                                     <div class="space-y-2">
                                                         <h4 class="font-medium text-gray-900 dark:text-white flex align-items-center">
@@ -651,7 +478,6 @@ onMounted(async () => {
                                     </template>
                                 </Card>
 
-                                <!-- Danger Zone -->
                                 <Card>
                                     <template #title>
                                         <div class="flex align-items-center text-red-600">
@@ -660,16 +486,8 @@ onMounted(async () => {
                                         </div>
                                     </template>
                                     <template #content>
-                                        <Message severity="error" :closable="false" class="mb-4">
-                                            Cette action supprimera définitivement toutes les données de test (devices et feedbacks).
-                                        </Message>
-                                        <Button
-                                            @click="cleanAllData"
-                                            :loading="loading"
-                                            label="Supprimer Toutes les Données"
-                                            icon="pi pi-trash"
-                                            severity="danger"
-                                        />
+                                        <Message severity="error" :closable="false" class="mb-4"> Cette action supprimera définitivement toutes les données de test (devices et feedbacks). </Message>
+                                        <Button @click="cleanAllData" :loading="loading" label="Supprimer Toutes les Données" icon="pi pi-trash" severity="danger" />
                                     </template>
                                 </Card>
                             </div>
