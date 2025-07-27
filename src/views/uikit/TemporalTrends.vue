@@ -4,7 +4,13 @@ import { apiClient } from '@/service/auth';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import Highcharts from 'highcharts';
-import { Chart } from 'highcharts-vue';
+import HighchartsVue from 'highcharts-vue';
+
+// Assurez-vous que les modules nécessaires sont chargés
+// Si vous utilisez Highcharts v12+, les modules sont chargés automatiquement
+// Sinon, décommentez ces lignes :
+// import exportingInit from 'highcharts/modules/exporting';
+// exportingInit(Highcharts);
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const toast = useToast();
@@ -17,6 +23,8 @@ const selectedPeriod = ref('daily');
 const startDate = ref(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
 const endDate = ref(new Date().toISOString().split('T')[0]);
 const chartRef = ref(null);
+const chartContainer = ref(null);
+let chartInstance = null;
 
 // Period options
 const periodOptions = [
@@ -212,6 +220,30 @@ const periodsCount = computed(() => {
     return trendsData.value && trendsData.value.categories ? trendsData.value.categories.length : 0;
 });
 
+// Fonction pour créer le graphique manuellement
+const createChart = () => {
+    try {
+        if (chartContainer.value && chartOptions.value && Object.keys(chartOptions.value).length > 0) {
+            // Détruire l'instance précédente si elle existe
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            // Créer une nouvelle instance
+            chartInstance = Highcharts.chart(chartContainer.value, chartOptions.value);
+        }
+    } catch (error) {
+        console.error('Erreur lors de la création du graphique:', error);
+    }
+};
+
+// Watch pour recréer le graphique quand les options changent
+watch(chartOptions, () => {
+    nextTick(() => {
+        createChart();
+    });
+}, { deep: true });
+
 // Fonction pour obtenir les données d'une série
 const getSeriesData = (seriesName, index) => {
     if (!trendsData.value || !trendsData.value.series) return 0;
@@ -241,13 +273,13 @@ const fetchTemporalTrends = async () => {
         const response = await apiClient.get('/app/dashboard/trends', { params });
         
         // Debug: log des données reçues
-        // console.log(response.data.data);
+        console.log('Données reçues:', response.data);
         
         // Extraire les données de la réponse API
         trendsData.value = response.data.data;
 
         // Vérifier la structure des données
-        if (!response.data.data.series || response.data.data.series.length === 0) {
+        if (!response.data.series || response.data.series.length === 0) {
             console.warn('Aucune série de données trouvée');
         }
 
@@ -274,21 +306,34 @@ const fetchTemporalTrends = async () => {
 
 // Lifecycle
 onMounted(async () => {
-    await fetchTemporalTrends();
+    try {
+        await fetchTemporalTrends();
+        // Attendre que le DOM soit mis à jour avant de rendre le graphique
+        await nextTick();
+        createChart();
+    } catch (error) {
+        console.error('Erreur lors du montage du composant:', error);
+    }
 });
 
 // Watch for filter changes
-watch([selectedPeriod, startDate, endDate], () => {
-    fetchTemporalTrends();
+watch([selectedPeriod, startDate, endDate], async () => {
+    try {
+        await fetchTemporalTrends();
+        await nextTick();
+        createChart();
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour:', error);
+    }
 });
 
 // Cleanup
 onBeforeUnmount(() => {
-    // Le composant Chart de highcharts-vue gère automatiquement la destruction
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
 });
-
-console.log(trendsData.value);
-
 </script>
 
 <template>
@@ -378,7 +423,10 @@ console.log(trendsData.value);
                      class="text-center py-8 text-gray-500">
                     Configuration du graphique en cours...
                 </div>
-                <Chart v-else :options="chartOptions" ref="chartRef" />
+                <!-- Container pour le graphique avec gestion d'erreur -->
+                <div v-else>
+                    <div ref="chartContainer" style="height: 400px; width: 100%;"></div>
+                </div>
             </div>
 
             <!-- Data Summary Table -->
