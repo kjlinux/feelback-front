@@ -15,35 +15,28 @@ const router = createRouter({
                     meta: { requiresAuth: true }
                 },
                 {
-                    path: '/uikit/registration',
-                    name: 'registration',
-                    component: () => import('@/views/uikit/Registration.vue'),
+                    path: '/uikit/temporal-trends',
+                    name: 'temporal-trends',
+                    component: () => import('@/views/uikit/TemporalTrends.vue'),
                     meta: { requiresAuth: true }
                 },
                 {
-                    path: '/uikit/contract-manager',
-                    name: 'contract-manager',
-                    component: () => import('@/views/uikit/ContractManager.vue'),
+                    path: '/uikit/device-performance',
+                    name: 'device-performance',
+                    component: () => import('@/views/uikit/DevicePerformance.vue'),
                     meta: { requiresAuth: true }
                 },
                 {
-                    path: '/uikit/contracts/:id',
-                    name: 'contract-details',
-                    component: () => import('@/views/uikit/ContractDetails.vue'),
+                    path: '/uikit/hourly-patterns',
+                    name: 'hourly-patterns',
+                    component: () => import('@/views/uikit/HourlyPatterns.vue'),
                     props: true,
                     meta: { requiresAuth: true }
                 },
                 {
-                    path: '/uikit/contracts/update/:id',
-                    name: 'contract-update',
-                    component: () => import('@/views/uikit/ContractUpdate.vue'),
-                    props: true,
-                    meta: { requiresAuth: true }
-                },
-                {
-                    path: '/uikit/contract-commission',
-                    name: 'contract-commission',
-                    component: () => import('@/views/uikit/ContractCommission.vue'),
+                    path: '/uikit/sentiment-distribution',
+                    name: 'sentiment-distribution',
+                    component: () => import('@/views/uikit/SentimentDistribution.vue'),
                     props: true,
                     meta: { requiresAuth: true }
                 },

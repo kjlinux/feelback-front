@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import TemporalTrends from './uikit/TemporalTrends.vue';
+import DevicePerformance from './uikit/DevicePerformance.vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const toast = useToast();
@@ -416,11 +417,6 @@ watch(isDarkTheme, () => {
             </div>
           </div>
         </div>
-
-        <div class="w-full">
-            <TemporalTrends />
-        </div>
-
 
         <!-- Refresh Button -->
         <div class="flex justify-center">

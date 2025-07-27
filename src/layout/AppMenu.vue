@@ -8,10 +8,10 @@ const model = ref([
         label: 'Menu',
         items: [
             { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Enregistrement', icon: 'pi pi-fw pi-save', to: '/uikit/registration' },
-            { label: 'Gérer les contrats', icon: 'pi pi-fw pi-file-edit', to: '/uikit/contract-manager' },
-            { label: 'Commissions', icon: 'pi pi-fw pi-chart-line', to: '/uikit/contract-commission' },
-            { label: 'Paiements', icon: 'pi pi-fw pi-credit-card', to: '/uikit/contract-payment' },
+            { label: 'Tendances Temporelles', icon: 'pi pi-fw pi-calendar-clock', to: '/uikit/temporal-trends' },
+            { label: 'Performance par Dispositif', icon: 'pi pi-fw pi-sliders-h', to: '/uikit/device-performance' },
+            { label: "Patterns Horaires d'Utilisation", icon: 'pi pi-fw pi-clock', to: '/uikit/hourly-patterns' },
+            { label: 'Distribution des Sentiments', icon: 'pi pi-fw pi-chart-bar', to: '/uikit/sentiment-distribution' },
             { label: 'Paramètres', icon: 'pi pi-fw pi-cog', to: '/uikit/settings' }
         ]
     }

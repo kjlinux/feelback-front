@@ -4,13 +4,6 @@ import { apiClient } from '@/service/auth';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref, watch, nextTick, onBeforeUnmount } from 'vue';
 import Highcharts from 'highcharts';
-import HighchartsVue from 'highcharts-vue';
-
-// Assurez-vous que les modules nécessaires sont chargés
-// Si vous utilisez Highcharts v12+, les modules sont chargés automatiquement
-// Sinon, décommentez ces lignes :
-// import exportingInit from 'highcharts/modules/exporting';
-// exportingInit(Highcharts);
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const toast = useToast();
