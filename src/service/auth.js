@@ -7,7 +7,7 @@ const ROLES_KEY = 'user_roles';
 const PERMISSIONS_KEY = 'user_permissions';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://expat.api.assursuite.com/api'
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 });
 
 api.interceptors.request.use(
