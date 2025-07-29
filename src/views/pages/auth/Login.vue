@@ -86,10 +86,10 @@ const forgotPassword = () => {
 
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">
-                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2 hidden"></Checkbox>
+                                <!-- <Checkbox v-model="checked" id="rememberme1" binary class="mr-2 hidden d-none"></Checkbox> -->
                                 <!-- <label for="rememberme1">Se souvenir de moi</label> -->
                             </div>
-                            <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary" @click="forgotPassword">Mot de passe oublié ?</span>
+                            <!-- <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary" @click="forgotPassword">Mot de passe oublié ?</span> -->
                         </div>
                         <Button label="Me connecter" class="w-full" @click="handleLogin" :loading="loading"></Button>
                     </div>

@@ -319,15 +319,15 @@ const getTrendLabel = (trend) => {
 const getTrendIcon = (trend) => {
     switch (trend) {
         case 'excellent':
-            return '🚀';
+            return 'Excellent';
         case 'good':
-            return '👍';
+            return 'Bon';
         case 'moderate':
-            return '⚖️';
+            return 'Modéré';
         case 'poor':
-            return '⚠️';
+            return 'Insuffisant';
         default:
-            return '📊';
+            return 'null';
     }
 };
 
@@ -511,7 +511,7 @@ onBeforeUnmount(() => {
                     </h3>
                     <div class="space-y-4">
                         <div class="p-4 bg-white dark:bg-gray-800 rounded-lg">
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">📊 Analyse Globale</h4>
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">Analyse Globale</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Sur les {{ selectedPeriod }} derniers jours, avec {{ satisfactionRate.toFixed(1) }}% de satisfaction, votre performance est
                                 {{ satisfactionRate >= 70 ? 'excellente' : satisfactionRate >= 50 ? 'correcte' : 'à améliorer' }}.
@@ -519,7 +519,7 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div class="p-4 bg-white dark:bg-gray-800 rounded-lg" v-if="sentimentData.series[0].data.find((item) => item.name === 'Insatisfait')">
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">🎯 Points d'Amélioration</h4>
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">Points d'Amélioration</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 {{ sentimentData.series[0].data.find((item) => item.name === 'Insatisfait').percentage.toFixed(1) }}% d'insatisfaction représente
                                 {{ sentimentData.series[0].data.find((item) => item.name === 'Insatisfait').y.toLocaleString() }}
@@ -528,32 +528,9 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div class="p-4 bg-white dark:bg-gray-800 rounded-lg" v-if="sentimentData.series[0].data.find((item) => item.name === 'Neutre')">
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">⚡ Potentiel de Conversion</h4>
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">Potentiel de Conversion</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-400">{{ sentimentData.series[0].data.find((item) => item.name === 'Neutre').percentage.toFixed(1) }}% d'utilisateurs neutres peuvent être convertis en clients satisfaits.</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                <h3 class="text-lg font-medium text-yellow-800 dark:text-yellow-200 mb-3 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                    Actions Recommandées
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                        <div class="font-medium text-gray-900 dark:text-white">1. Analyser les causes</div>
-                        <div class="text-gray-600 dark:text-gray-400 mt-1">Identifier pourquoi certains utilisateurs sont insatisfaits</div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                        <div class="font-medium text-gray-900 dark:text-white">2. Engager les neutres</div>
-                        <div class="text-gray-600 dark:text-gray-400 mt-1">Créer des campagnes pour convertir les utilisateurs neutres</div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg">
-                        <div class="font-medium text-gray-900 dark:text-white">3. Fidéliser les satisfaits</div>
-                        <div class="text-gray-600 dark:text-gray-400 mt-1">Maintenir la qualité pour les utilisateurs satisfaits</div>
                     </div>
                 </div>
             </div>

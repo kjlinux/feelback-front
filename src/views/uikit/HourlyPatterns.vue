@@ -154,10 +154,10 @@ const chartOptions = computed(() => {
 
                 if (this.series.name === 'Nombre de feedbacks') {
                     tooltip += `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${this.y.toLocaleString()}</b><br/>`;
-                    tooltip += `📊 Intensité: ${getIntensityLabel(this.y, maxFeedback)}`;
+                    tooltip += `Intensité: ${getIntensityLabel(this.y, maxFeedback)}`;
                 } else {
                     tooltip += `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${this.y.toFixed(2)}</b><br/>`;
-                    tooltip += `⭐ Qualité: ${getScoreLabel(this.y)}`;
+                    tooltip += `Qualité: ${getScoreLabel(this.y)}`;
                 }
 
                 return tooltip;
@@ -551,10 +551,10 @@ onBeforeUnmount(() => {
                     <div>
                         <h4 class="font-medium text-gray-900 dark:text-white mb-2">Périodes de la journée :</h4>
                         <div class="space-y-1 text-gray-600 dark:text-gray-400">
-                            <div>🌅 <strong>Matin :</strong> 05:00 - 11:59</div>
-                            <div>☀️ <strong>Après-midi :</strong> 12:00 - 17:59</div>
-                            <div>🌆 <strong>Soirée :</strong> 18:00 - 21:59</div>
-                            <div>🌙 <strong>Nuit :</strong> 22:00 - 04:59</div>
+                            <div><strong>Matin :</strong> 05:00 - 11:59</div>
+                            <div><strong>Après-midi :</strong> 12:00 - 17:59</div>
+                            <div><strong>Soirée :</strong> 18:00 - 21:59</div>
+                            <div><strong>Nuit :</strong> 22:00 - 04:59</div>
                         </div>
                     </div>
                 </div>
